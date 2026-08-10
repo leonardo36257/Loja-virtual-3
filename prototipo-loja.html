@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigiShop - Loja Virtual</title>
+<style>
+  :root{
+    --marrom-escuro:#6b4226;
+    --marrom-medio:#8a5a3c;
+    --marrom-claro:#b97a4c;
+    --creme:#f7e6d0;
+    --vermelho:#c0392b;
+    --texto-claro:#fbeee0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', 'Franklin Gothic Medium', Arial, sans-serif;
+    background:#f4f1ee;
+    color:#333;
+  }
+  .app{
+    max-width:1000px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--marrom-medio);
+    position:relative;
+  }
+
+  /* ---------- HEADER ---------- */
+  header.topbar{
+    background:linear-gradient(180deg, var(--marrom-claro), var(--marrom-medio));
+    color:var(--texto-claro);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    position:sticky;
+    top:0;
+    z-index:10;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  .menu-icon{
+    width:28px;
+    cursor:pointer;
+  }
+  .menu-icon div{
+    height:3px;
+    background:var(--texto-claro);
+    margin:5px 0;
+    border-radius:2px;
+  }
+  header.topbar h1{
+    font-size:22px;
+    margin:0;
+    font-weight:700;
+    text-align:center;
+    flex:1;
+  }
+  .top-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .back-btn{
+    background:none;
+    border:none;
+    color:var(--texto-claro);
+    font-size:22px;
+    cursor:pointer;
+    display:none;
+    line-height:1;
+  }
+  .back-btn.show{display:inline-block;}
+  .logo-mini{
+    font-size:11px;
+    text-align:center;
+    color:var(--creme);
+    opacity:.85;
+    line-height:1.1;
+  }
+  .logo-mini span{
+    display:block;
+    font-size:18px;
+  }
+
+  /* ---------- HOME (lista de lojas) ---------- */
+  #tela-home{
+    padding:60px 24px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:24px;
+  }
+  .card-loja{
+    background:var(--creme);
+    border-radius:16px;
+    padding:22px 18px;
+    text-align:center;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,.25);
+    transition:transform .15s ease, box-shadow .15s ease;
+    position:relative;
+  }
+  .card-loja:hover{
+    transform:translateY(-4px);
+    box-shadow:0 8px 16px rgba(0,0,0,.3);
+  }
+  .card-loja h2{
+    font-size:20px;
+    margin:0 0 14px 0;
+    color:#3a2415;
+  }
+  .card-loja .icone-loja{
+    font-size:56px;
+    margin-bottom:10px;
+  }
+  .card-loja .mini-carrinho{
+    position:absolute;
+    bottom:16px;
+    right:16px;
+    background:var(--marrom-escuro);
+    color:var(--texto-claro);
+    width:34px;
+    height:34px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+  }
+
+  /* ---------- TELA DE LOJA ---------- */
+  .tela-loja{
+    display:none;
+    padding:30px 20px 100px 20px;
+  }
+  .tela-loja.ativa{display:block;}
+  #tela-home.oculto{display:none;}
+
+  #produtos{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:22px;
+    max-width:820px;
+    margin:0 auto;
+  }
+  .produto{
+    background:var(--creme);
+    border-radius:14px;
+    padding:12px;
+    position:relative;
+    box-shadow:0 3px 8px rgba(0,0,0,.2);
+    text-align:left;
+  }
+  .produto .fav{
+    position:absolute;
+    top:10px;
+    right:10px;
+    font-size:16px;
+    color:#3a2415;
+    opacity:.6;
+    cursor:pointer;
+  }
+  .produto .unidade{
+    position:absolute;
+    top:10px;
+    left:10px;
+    font-size:11px;
+    color:#3a2415;
+    opacity:.7;
+    font-weight:600;
+  }
+  .produto .img-produto{
+    width:100%;
+    height:110px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:48px;
+    background:#fff;
+    margin-top:6px;
+    margin-bottom:8px;
+
+  }
+  .produto .img-produto img{
+    width:100%;
+    height:100%;
+    
+  }
+  .produto h3{
+    font-size:14px;
+    margin:4px 0 2px 0;
+    color:#2b1c10;
+  }
+  .produto .preco{
+    color:var(--vermelho);
+    font-weight:700;
+    font-size:14px;
+  }
+  .produto .add-btn{
+    position:absolute;
+    bottom:12px;
+    right:12px;
+    background:var(--vermelho);
+    color:#fff;
+    border:none;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    font-size:18px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .produto .add-btn:active{transform:scale(0.9);}
+
+  /* ---------- CARRINHO FLUTUANTE ---------- */
+  .carrinho-flutuante{
+    position:fixed;
+    bottom:26px;
+    right:26px;
+    width:56px;
+    height:56px;
+    background:var(--marrom-escuro);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--texto-claro);
+    font-size:24px;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
+    z-index:20;
+  }
+  .carrinho-flutuante .badge{
+    position:absolute;
+    top:-6px;
+    right:-6px;
+    background:var(--vermelho);
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* ---------- PAINEL CARRINHO (lateral) ---------- */
+  #detalhes-carrinho{
+    position:fixed;
+    top:0;
+    right:-340px;
+    width:320px;
+    max-width:85vw;
+    height:100%;
+    background:#fffaf3;
+    box-shadow:-3px 0 12px rgba(0,0,0,.3);
+    transition:right .3s ease;
+    padding:22px;
+    z-index:30;
+    display:flex;
+    flex-direction:column;
+  }
+  #detalhes-carrinho.ativa{right:0;}
+  #detalhes-carrinho h2{
+    margin-top:0;
+    color:var(--marrom-escuro);
+  }
+  #detalhes-carrinho .fechar{
+    position:absolute;
+    top:16px;
+    right:16px;
+    background:none;
+    border:none;
+    font-size:22px;
+    cursor:pointer;
+    color:var(--marrom-escuro);
+  }
+  #lista-carrinho{
+    list-style:none;
+    padding:0;
+    margin:0;
+    flex:1;
+    overflow-y:auto;
+  }
+  #lista-carrinho li{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid #e6d7c3;
+    font-size:14px;
+  }
+  #lista-carrinho li button{
+    background:none;
+    border:none;
+    color:var(--vermelho);
+    cursor:pointer;
+    font-size:16px;
+  }
+  #lista-carrinho .vazio{
+    color:#999;
+    text-align:center;
+    margin-top:30px;
+    font-size:14px;
+  }
+  .carrinho-rodape{
+    border-top:2px solid var(--marrom-claro);
+    padding-top:14px;
+    margin-top:10px;
+  }
+  .carrinho-rodape .total-linha{
+    display:flex;
+    justify-content:space-between;
+    font-weight:700;
+    font-size:16px;
+    margin-bottom:12px;
+    color:#2b1c10;
+  }
+  #finalizar{
+    width:100%;
+    background:#25D366;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:12px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  #finalizar:hover{background:#1eb958;}
+
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.35);
+    z-index:25;
+    display:none;
+  }
+  .overlay.ativa{display:block;}
+
+  /* ---------- MENU LATERAL (hamburguer) ---------- */
+  #menu-lateral{
+    position:fixed;
+    top:0;
+    left:-260px;
+    width:240px;
+    height:100%;
+    background:var(--marrom-escuro);
+    color:var(--texto-claro);
+    z-index:30;
+    transition:left .3s ease;
+    padding:24px 18px;
+  }
+  #menu-lateral.ativa{left:0;}
+  #menu-lateral h3{
+    margin-top:0;
+    border-bottom:1px solid rgba(255,255,255,.2);
+    padding-bottom:10px;
+  }
+  #menu-lateral a{
+    display:block;
+    color:var(--texto-claro);
+    text-decoration:none;
+    padding:10px 0;
+    font-size:15px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    cursor:pointer;
+  }
+
+  @media (max-width:480px){
+    header.topbar h1{font-size:17px;}
+    .card-loja .icone-loja{font-size:44px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="menu-icon" onclick="alternarMenu()">
+      <div></div><div></div><div></div>
+    </div>
+    <h1 id="titulo-loja">DigiShop</h1>
+    <div class="top-right">
+      <button class="back-btn" id="btn-voltar" onclick="irParaHome()">&#8592;</button>
+      <div class="logo-mini"><span>&#127974;</span>DigiShop</div>
+    </div>
+  </header>
+
+  <!-- MENU LATERAL -->
+  <div id="menu-lateral">
+    <h3>Menu</h3>
+    <a onclick="irParaHome()">Página inicial</a>
+    <a onclick="abrirCarrinho()">Carrinho</a>
+    <a>Sobre nós</a>
+  </div>
+  <div class="overlay" id="overlay-menu" onclick="alternarMenu()"></div>
+
+  <!-- TELA HOME -->
+  <div id="tela-home"></div>
+
+  <!-- TELAS DAS LOJAS (geradas via JS) -->
+  <div id="lojas-container"></div>
+
+  <!-- Carrinho flutuante -->
+  <div class="carrinho-flutuante" onclick="abrirCarrinho()">
+    &#128722;
+    <div class="badge" id="badge-qtd">0</div>
+  </div>
+
+  <!-- Painel do carrinho -->
+  <aside id="detalhes-carrinho">
+    <button class="fechar" onclick="fecharCarrinho()">&times;</button>
+    <h2>Carrinho</h2>
+    <ul id="lista-carrinho"></ul>
+    <div class="carrinho-rodape">
+      <div class="total-linha">
+        <span>Total:</span>
+        <span>R$ <span id="total">0,00</span></span>
+      </div>
+      <button id="finalizar" onclick="enviarMensagem()">Finalizar Compra</button>
+    </div>
+  </aside>
+  <div class="overlay" id="overlay-carrinho" onclick="fecharCarrinho()"></div>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------
+   DADOS DAS LOJAS (baseado no seu script.js original,
+   adaptado para as 3 lojas das imagens)
+--------------------------------------------------------- */
+const lojas = {
+  jonas: {
+    nome: "Loja do Jonas",
+    icone: "🪑",
+    produtos: [
+      { id: "j1", nome: "Mesa de Madeira Rústica", preco: 5500.00, unidade:null, icone:"🪵",img:"Mesa.jpg" },
+      { id: "j2", nome: "Cadeira de Madeira Grande", preco: 559.99, unidade:null, icone:"🪑",img:"CadeiraGrande.PNG" },
+      { id: "j3", nome: "Cômoda de Madeira", preco: 1300.00, unidade:null, icone:"🗄️",img:"Comoda.jpeg" },
+      { id: "j4", nome: "Cadeira Dobravel", preco: 100.00, unidade:null, icone:"🌿",img:"CadeiraJardim.PNG" },
+      { id: "j5", nome: "Mesa de Centro", preco: 500.00, unidade:null, icone:"🛋️",img:"MesaCentro.jfif" },
+    ]
+  },
+  renata: {
+    nome: "Loja da Renata",
+    icone: "🏺",
+    produtos: [
+      { id: "r1", nome: "Fonte de cerâmica", preco: 79.99, unidade:null, icone:"⛲",img:"Fonte.jpg" },
+      { id: "r2", nome: "Jarro de cerâmica", preco: 59.99, unidade:null, icone:"🏺",img:"Jarra.jpg" },
+      { id: "r3", nome: "Conjunto de vasos", preco: 249.99, unidade:null, icone:"🏺",img:"Conjunto.jpg" },
+      { id: "r4", nome: "Filtro de Barro", preco: 160.00, unidade:null, icone:"🫙",img:"Filtro.webp" },
+      { id: "r5", nome: "Vaso de cerâmica", preco: 49.99, unidade:null, icone:"🍶",img:"Vaso.webp" },
+    ]
+  },
+  hadassa: {
+    nome: "Loja da Carla",
+    icone: "🧶",
+    produtos: [
+      { id: "h1", nome: "Jogo de Cozinha em Crochê", preco: 80.00, unidade:"Un", icone:"🧵",img:"TapeteVermelho.jpeg" },
+      { id: "h2", nome: "Tapete de Flor Azul", preco: 69.99, unidade:"Un", icone:"🧶",img:"ToalhaCroche.jfif" },
+      { id: "h3", nome: "Tapete Retangulo de Crochê", preco: 89.00, unidade:"Un", icone:"🧿",img:"TapeteRetangulo.jfif" },
+      { id: "h4", nome: "Conjunto de Tapetes Marrons", preco: 114.75, unidade:"Un", icone:"🎀",img:"TapeteMarrom.jpg" },
+      { id: "h5", nome: "Conjunto de Banheiro Azul", preco: 120.00, unidade:"Un", icone:"🪡",img:"TapeteAzul.PNG" },
+    ]
+  }
+};
+
+/* ---------------------------------------------------------
+   CARRINHO (lógica adaptada do seu script.js)
+--------------------------------------------------------- */
+let carrinho = [];
+let quantidade = 0;
+let lojaAtual = null;
+
+function formatar(v){
+  return v.toFixed(2).replace(".", ",");
+}
+
+function montarHome(){
+  const home = document.getElementById("tela-home");
+  home.innerHTML = "";
+  Object.keys(lojas).forEach(key => {
+    const loja = lojas[key];
+    home.innerHTML += `
+      <div class="card-loja" onclick="abrirLoja('${key}')">
+        <div class="icone-loja">${loja.icone}</div>
+        <h2>${loja.nome}</h2>
+        <div class="mini-carrinho">&#128722;</div>
+      </div>
+    `;
+  });
+}
+
+function montarLojas(){
+  const container = document.getElementById("lojas-container");
+  container.innerHTML = "";
+  Object.keys(lojas).forEach(key => {
+    const loja = lojas[key];
+    let produtosHtml = "";
+    loja.produtos.forEach(p => {
+      produtosHtml += `
+        <div class="produto">
+          ${p.unidade ? `<span class="unidade">${p.unidade}</span>` : ""}
+          <span class="fav">&#9825;</span>
+          <div class="img-produto"> <img src="${p.img}"></div>
+          <h3>${p.nome}</h3>
+          <p class="preco">R$ ${formatar(p.preco)}</p>
+          <button class="add-btn" onclick="adicionarAoCarrinho('${p.id}','${key}')">+</button>
+        </div>
+      `;
+    });
+    container.innerHTML += `
+      <div class="tela-loja" id="tela-${key}">
+        <div id="produtos">${produtosHtml}</div>
+      </div>
+    `;
+  });
+}
+
+function abrirLoja(key){
+  lojaAtual = key;
+  document.getElementById("tela-home").classList.add("oculto");
+  document.querySelectorAll(".tela-loja").forEach(t => t.classList.remove("ativa"));
+  document.getElementById("tela-" + key).classList.add("ativa");
+  document.getElementById("titulo-loja").textContent = lojas[key].nome;
+  document.getElementById("btn-voltar").classList.add("show");
+  window.scrollTo(0,0);
+}
+
+function irParaHome(){
+  lojaAtual = null;
+  document.querySelectorAll(".tela-loja").forEach(t => t.classList.remove("ativa"));
+  document.getElementById("tela-home").classList.remove("oculto");
+  document.getElementById("titulo-loja").textContent = "DigiShop";
+  document.getElementById("btn-voltar").classList.remove("show");
+  fecharMenu();
+  window.scrollTo(0,0);
+}
+
+function adicionarAoCarrinho(idProduto, lojaKey){
+  const produto = lojas[lojaKey].produtos.find(p => p.id === idProduto);
+  carrinho.push({ ...produto, loja: lojas[lojaKey].nome });
+  quantidade++;
+  atualizarBadge();
+  atualizarListaCarrinho();
+}
+
+function removerDoCarrinho(index){
+  carrinho.splice(index, 1);
+  quantidade = carrinho.length;
+  atualizarBadge();
+  atualizarListaCarrinho();
+}
+
+function atualizarBadge(){
+  document.getElementById("badge-qtd").textContent = quantidade;
+}
+
+function atualizarListaCarrinho(){
+  const lista = document.getElementById("lista-carrinho");
+  let total = 0;
+  if(carrinho.length === 0){
+    lista.innerHTML = `<li class="vazio" style="border:none;">Seu carrinho está vazio</li>`;
+  } else {
+    lista.innerHTML = "";
+    carrinho.forEach((item, i) => {
+      total += item.preco;
+      lista.innerHTML += `
+        <li>
+          <span>${item.icone} ${item.nome} <br><small style="color:#888">${item.loja}</small></span>
+          <span>R$ ${formatar(item.preco)} <button onclick="removerDoCarrinho(${i})">&times;</button></span>
+        </li>
+      `;
+    });
+  }
+  document.getElementById("total").textContent = formatar(total);
+}
+
+function abrirCarrinho(){
+  document.getElementById("detalhes-carrinho").classList.add("ativa");
+  document.getElementById("overlay-carrinho").classList.add("ativa");
+  fecharMenu();
+}
+function fecharCarrinho(){
+  document.getElementById("detalhes-carrinho").classList.remove("ativa");
+  document.getElementById("overlay-carrinho").classList.remove("ativa");
+}
+
+function alternarMenu(){
+  document.getElementById("menu-lateral").classList.toggle("ativa");
+  document.getElementById("overlay-menu").classList.toggle("ativa");
+}
+function fecharMenu(){
+  document.getElementById("menu-lateral").classList.remove("ativa");
+  document.getElementById("overlay-menu").classList.remove("ativa");
+}
+
+function enviarMensagem(){
+  if(carrinho.length === 0){
+    alert("Seu carrinho está vazio!");
+    return;
+  }
+  const numeroLoja = "5544999112486";
+  let mensagem = "Olá, gostaria de pedir esses produtos:\n\n";
+  let total = 0;
+  carrinho.forEach(item => {
+    mensagem += `- ${item.nome} (${item.loja}) - R$ ${formatar(item.preco)}\n`;
+    total += item.preco;
+  });
+  mensagem += `\nTotal: R$ ${formatar(total)}`;
+
+  try {
+    const mensagemCodificada = encodeURIComponent(mensagem);
+    const linkWhatsApp = `https://wa.me/${numeroLoja}?text=${mensagemCodificada}`;
+    window.open(linkWhatsApp, "_blank");
+  } catch (error){
+    console.error("Erro ao abrir o WhatsApp", error);
+    alert("Não foi possível abrir o WhatsApp. Tente novamente.");
+  }
+}
+
+/* Inicialização */
+montarHome();
+montarLojas();
+atualizarListaCarrinho();
+</script>
+
+</body>
+</html>
